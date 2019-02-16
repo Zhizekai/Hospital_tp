@@ -32,7 +32,9 @@
         "ezyang/htmlpurifier": "^4.9",
         "topthink/think-queue": "^1.1.4",
         "electrolinux/phpquery": "^0.9.6",
-        "phpoffice/phpspreadsheet": "^1.5"
+        "phpoffice/phpspreadsheet": "^1.5",
+        "jiguang/jsms": "~1.0"
+
     },
     "extra": {
         "think-path": "simplewind/thinkphp"

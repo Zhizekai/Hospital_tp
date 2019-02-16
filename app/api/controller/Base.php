@@ -73,14 +73,14 @@ class Base extends Controller
 //    前端可封装
     //发送请求
 //    function request(ajax, sign) {
-//        if (sign != undefined) {
-//            if (ajax.data == undefined) ajax.data = {};
-//        ajax.data.timestamp = ((new Date()).getTime()) / 1000;
-//        ajax.data.token = token;
-//        ajax.data.sign = hex_sha1(token + salt + ajax.url.toLowerCase() + ajax.data.timestamp);
-//    }
-//        $.ajax(ajax);
-//    }
+////        if (sign != undefined) {
+////            if (ajax.data == undefined) ajax.data = {};
+////        ajax.data.timestamp = ((new Date()).getTime()) / 1000;
+////        ajax.data.token = token;
+////        ajax.data.sign = hex_sha1(token + salt + ajax.url.toLowerCase() + ajax.data.timestamp);
+////    }
+////        $.ajax(ajax);
+////    }
 
     /**
      * 检查sign是否正常
