@@ -29,47 +29,19 @@ class UsersController extends Base
      */
     public function register()
     {
+        //获取    电话  密码  验证码
         $mobile = input('mobile', 0,'intval');
-        $name = input('name','','trim');
-        $sex = input('sex',0,'intval');
-        $age = input('age',0,'intval');
-        $weight = input('weight',0,'intval');
-        $height = input('height',0,'intval');
-        $emergency_mobile = input('emergency_mobile',0,'intval');
         $password = input('password','','trim');
+        $code = input('code','','trim');
 
-        if (empty($mobile)) {
-            return '请输入电话号码';
-        }
-        if (empty($password)) {
-            return '请输入密码';
-        }
-        if (empty($name)) {
-            return '请输入名字';
-        }
-        if (empty($sex)) {
-            return '请输入性别';
-        }
-        if (empty($age)) {
-            return '请输入年龄';
-        }
-        if (empty($weight)) {
-            return '请输入体重';
-        }
-        if (empty($height)) {
-            return '请输入身高';
-        }
-        if (empty($code)) {
-            return '请输入验证码';
-        }
-        if (empty($emergency_mobile)) {
-            return '你没输紧急电话';
+        if (empty($mobile)||empty($password)) {
+            $this->output_error(10001,'手机号/密码不能为空');
         }
 
         $msg_id = cache::get($mobile);
         $check_code = $this->check_code($msg_id, $code);
         if (!$check_code) {
-            return '验证码不对，这是你手机么';
+            $this->output_error(10010,'验证码不对');
         }
 
         $check = Db::name('user')->where('mobile', $mobile)->find();
@@ -79,12 +51,6 @@ class UsersController extends Base
         } else {
             $data = [
                 'mobile' => $mobile,
-                'name'  => $name,
-                'sex'   => $sex,
-                'age'   => $age,
-                'weight'=> $weight,
-                'height'=> $height,
-                'emergency_mobile' => $emergency_mobile,
                 'password' => password($password),
             ];
 
@@ -102,7 +68,6 @@ class UsersController extends Base
 
     /**
      * 发送验证码
-     * @return string
      */
     public function send()
     {
@@ -113,7 +78,7 @@ class UsersController extends Base
         $phone = input('phone', '');
 
         if (empty($phone)) {
-            return '你没输手机号';
+            return $this->output_error(10001,'你没输手机号');
         }
 
         $client = new JSMS($appKey, $masterSecret, ['ssl_verify' => false]);
@@ -124,7 +89,7 @@ class UsersController extends Base
         //设置缓存
         cache::set($phone, $response['body']['msg_id'], 60);
 
-        return '已经向手机号为' . $phone . '的用户发送语音验证码';
+        return $this->output_success(10010,[],'已经向手机号为' . $phone . '的用户发送语音验证码');
     }
 
     /**
@@ -141,54 +106,6 @@ class UsersController extends Base
         $response = $client->checkCode($msg_id, $code);
         return $response['body']['is_valid'];
     }
-
-    /**
-     * 生成token
-     * @return string
-     */
-    private function makeToken()
-    {
-        $str = md5(uniqid(md5(microtime(true)), true));
-        $str = sha1($str);
-        return $str;
-    }
-    /**
-     * 用户登陆
-     * @return string
-     */
-    public function Login()
-    {
-        $phone = input('phone', '');
-        $password = input('password', '');
-
-        if (empty($phone)) {
-            return '你没输电话';
-        }
-        if (empty($password)) {
-            return '你没输密码';
-        }
-
-
-        $user_isset = Db::table('users')->where('phone', $phone)->find();
-        if ($user_isset == null) {
-            return json_encode(['msg' => "用户不存在"]);
-        } else {
-            $userpsisset = Db::table('users')->where('phone', $phone)->where('password', sha1(md5($password)))->find();
-            if ($userpsisset == null) {
-                return json_encode(['msg' => "密码错误"]);
-            } else {
-                $token = $this->makeToken();
-
-                /**设置超时时间*/
-                $time_out = strtotime("+7 days");
-
-                $res = Db::table('users')->where('phone', $phone)->update(['time_out' => $time_out, 'token' => $token]);
-                if ($res) {
-                    return json_encode(["msg" => "登录成功", "token" => $token]);
-                }
-            }
-        }
-    }
     /**
      * 注销
      * @return string
@@ -201,20 +118,6 @@ class UsersController extends Base
         }
         $result = Db::table('users')->where('token',$token)->setField('token',null);
         self::outcome($result);
-    }
-
-
-    public function index()
-    {
-        $view = new View();
-        $data = [
-            'sbb' => '我是底层架构师',
-            'zhi' => '高并发架构师',
-        ];
-
-        $view->assign('bbb',$data);
-
-        return $view->fetch('index');
     }
 
 }

@@ -41,7 +41,7 @@ class VersionController extends Base
             return $this->output_error(10001,'你没输入版本号');
         }
         //以年月日小时分钟秒的字符串的形式输出时间
-//        $update_time = date('Y-m-d h:i:s', time());
+       //$update_time = date('Y-m-d h:i:s', time());
 
         $res = Db::name('version')->where('id',1)->update(['version'=>$version,'update_time'=>time()]);
 
