@@ -70,6 +70,15 @@ class Base extends Controller
         return $json;
     }
 
+    protected function getuid($isSign = true)
+    {
+        if($isSign){
+            $this->check_sign();
+        }
+        $token = input('param.token');
+        return Token::get_user_id($token);
+    }
+
 //    前端可封装
     //发送请求
 //    function request(ajax, sign) {
