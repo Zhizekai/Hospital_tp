@@ -6,9 +6,10 @@
  * Time: 18:01
  */
 
-namespace app\index\controller;
+namespace app\api\controller;
 
 
+use app\api\model\UserModel;
 use think\Db;
 use think\Session;
 use think\Cache;
@@ -18,7 +19,7 @@ use think\View;
 
 vendor('jiguang');
 
-require __DIR__ . '..\..\..\simplewind\vendor\autoload.php';
+//require '../../../simplewind/vendor/autoload.php';
 
 class UsersController extends Base
 {
@@ -28,41 +29,75 @@ class UsersController extends Base
      */
     public function register()
     {
-        $phone = input('phone', 0,'intval');
-        $name = input('name','','prism');
-        $password = input('password', '');
-        $code = input('code', '');
+        $mobile = input('mobile', 0,'intval');
+        $name = input('name','','trim');
+        $sex = input('sex',0,'intval');
+        $age = input('age',0,'intval');
+        $weight = input('weight',0,'intval');
+        $height = input('height',0,'intval');
+        $emergency_mobile = input('emergency_mobile',0,'intval');
+        $password = input('password','','trim');
 
-        if (empty($phone)) {
-            return '你没输电话号码';
-        }
-        if (empty($password)) {
-            return '你没输密码';
-        }
-        if (empty($code)) {
-            return '你没输验证码';
-        }
+//        if (empty($phone)) {
+//            return '你没输电话号码';
+//        }
+//        if (empty($password)) {
+//            return '你没输密码';
+//        }
+//        if (empty($name)) {
+//            return '你没输名字';
+//        }
+//        if (empty($sex)) {
+//            return '你没输性别';
+//        }
+//        if (empty($age)) {
+//            return '你没输年龄';
+//        }
+//        if (empty($weight)) {
+//            return '你没输体重';
+//        }
+//        if (empty($height)) {
+//            return '你没输身高';
+//        }
+//        if (empty($code)) {
+//            return '你没输验证码';
+//        }
+//        if (empty($emergency_mobile)) {
+//            return '你没输紧急电话';
+//        }
 
-        $msg_id = cache::get($phone);
-        $check_code = $this->check_code($msg_id, $code);
-        if (!$check_code) {
-            return '验证码不对，这是你手机么';
-        }
+//        $msg_id = cache::get($phone);
+//        $check_code = $this->check_code($msg_id, $code);
+//        if (!$check_code) {
+//            return '验证码不对，这是你手机么';
+//        }
 
-        $check = Db::table('users')->where('phone', $phone)->select();
+        $check = Db::name('user')->where('mobile', $mobile)->find();
 
-        if ($check) {
+
+        if (!empty($check)) {
             return '该号码已经注册';
         } else {
             $data = [
-                'phone' => $phone,
-                'password' => sha1(md5($password)),
+                'mobile' => $mobile,
+                'name'  => $name,
+                'sex'   => $sex,
+                'age'   => $age,
+                'weight'=> $weight,
+                'height'=> $height,
+                'emergency_mobile' => $emergency_mobile,
+                'password' => password($password),
             ];
 
-            $result = Db::table('users')->insert($data);
+            $user = new UserModel();
+            $result = $user->validate(true)->insert($data);
         }
 
-        self::outcome($result);
+        if ($result){
+            return $this->output_success(10011,[],'用户注册成功');
+        }else{
+            return $this->output_error(10003,'用户注册失败');
+        }
 
     }
 

@@ -29,13 +29,13 @@ class LoginController extends Base
             return $this->output_error(11002,'请输入正确的手机号');
         }
 
-        $user_id = Db::name('users')->where(['mobile'=>$mobile,'status'=>1])->value('id');
+        $user_id = Db::name('user')->where(['mobile'=>$mobile,'status'=>1])->value('id');
 
         if (empty($user_id)){
             return $this->output_error(11003,'该手机号尚未注册');
         }
 
-        $user_info = Db::name('users')->where(['id'=>$user_id,'password'=>password($password)])->find();
+        $user_info = Db::name('user')->where(['id'=>$user_id,'password'=>password($password)])->find();
 
         if (!empty($user_info)){
             $token_info = Token::get($user_id);
