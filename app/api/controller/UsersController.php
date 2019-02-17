@@ -38,42 +38,41 @@ class UsersController extends Base
         $emergency_mobile = input('emergency_mobile',0,'intval');
         $password = input('password','','trim');
 
-//        if (empty($phone)) {
-//            return '你没输电话号码';
-//        }
-//        if (empty($password)) {
-//            return '你没输密码';
-//        }
-//        if (empty($name)) {
-//            return '你没输名字';
-//        }
-//        if (empty($sex)) {
-//            return '你没输性别';
-//        }
-//        if (empty($age)) {
-//            return '你没输年龄';
-//        }
-//        if (empty($weight)) {
-//            return '你没输体重';
-//        }
-//        if (empty($height)) {
-//            return '你没输身高';
-//        }
-//        if (empty($code)) {
-//            return '你没输验证码';
-//        }
-//        if (empty($emergency_mobile)) {
-//            return '你没输紧急电话';
-//        }
+        if (empty($mobile)) {
+            return '请输入电话号码';
+        }
+        if (empty($password)) {
+            return '请输入密码';
+        }
+        if (empty($name)) {
+            return '请输入名字';
+        }
+        if (empty($sex)) {
+            return '请输入性别';
+        }
+        if (empty($age)) {
+            return '请输入年龄';
+        }
+        if (empty($weight)) {
+            return '请输入体重';
+        }
+        if (empty($height)) {
+            return '请输入身高';
+        }
+        if (empty($code)) {
+            return '请输入验证码';
+        }
+        if (empty($emergency_mobile)) {
+            return '你没输紧急电话';
+        }
 
-//        $msg_id = cache::get($phone);
-//        $check_code = $this->check_code($msg_id, $code);
-//        if (!$check_code) {
-//            return '验证码不对，这是你手机么';
-//        }
+        $msg_id = cache::get($mobile);
+        $check_code = $this->check_code($msg_id, $code);
+        if (!$check_code) {
+            return '验证码不对，这是你手机么';
+        }
 
         $check = Db::name('user')->where('mobile', $mobile)->find();
-
 
         if (!empty($check)) {
             return '该号码已经注册';

@@ -14,7 +14,7 @@ use token\Token;
 class LoginController extends Base
 {
     /**
-     *
+     *用户登陆
      * @param $user_id
      * @return array
      */
