@@ -14,7 +14,7 @@ use think\Db;
 use think\File;
 use cmf\lib\Upload;
 
-class RealuserController extends Base
+class RealUserController extends Base
 {
 
     /**
@@ -99,20 +99,22 @@ class RealuserController extends Base
         $file['pos'] = request()->file('positive_img');
         $file['back'] = request()->file('back_img');
 
+        if (empty($file['pos'])||empty($file['back'])) {
+            return $this->output_error(500,'请上传图片');
+        }
+
         if ($file) {
 
             $info_pos = $file['pos']->move(ROOT_PATH . 'public' . DS . 'upload');
             $info_back = $file['back']->move(ROOT_PATH . 'public' . DS . 'upload');
 
             if ($info_back&&$info_pos){
-                $positive_img = 'http://hospital.weinuoabc.com/upload/'.$info_pos->getSaveName();
-                $back_img = 'http://hospital.weinuoabc.com/upload/'.$info_back->getSaveName();
+                $positive_img = 'http://hospital.weinuoabc.com/upload/real/'.$info_pos->getSaveName();
+                $back_img = 'http://hospital.weinuoabc.com/upload/real/'.$info_back->getSaveName();
             }else{
                 return $this->output_error(404,'图片上传失败');
             }
 
-        }else{
-            return $this->output_error(500,'请上传图片');
         }
 
         $data = [

@@ -11,13 +11,14 @@ namespace app\api\controller;
 
 use app\api\model\UserModel;
 use think\Db;
+use think\response\Json;
 use think\Session;
 use think\Cache;
 use JiGuang\JSMS;
 use think\File;
 use think\View;
 
-vendor('jiguang');
+vendor('jiguang.jsms.src.JSMS');
 
 //require '../../../simplewind/vendor/autoload.php';
 
@@ -25,12 +26,12 @@ class UsersController extends Base
 {
     /**
      * 用户注册
-     * @return string
+     * @return array
      */
     public function register()
     {
         //获取    电话  密码  验证码
-        $mobile = input('mobile', 0,'intval');
+        $mobile = input('mobile', 0,'trim');
         $password = input('password','','trim');
         $code = input('code','','trim');
 
@@ -47,7 +48,7 @@ class UsersController extends Base
         $check = Db::name('user')->where('mobile', $mobile)->find();
 
         if (!empty($check)) {
-            return '该号码已经注册';
+            return $this->output_success(10011,[],'该号码已注册');
         } else {
             $data = [
                 'mobile' => $mobile,
@@ -75,21 +76,22 @@ class UsersController extends Base
         $masterSecret = '289cc110f8f2c0a97a85dbeb';
 
         //获取手机号
-        $phone = input('phone', '');
+        $mobile = input('mobile', '','trim');
 
-        if (empty($phone)) {
+
+        if (empty($mobile)) {
             return $this->output_error(10001,'你没输手机号');
         }
 
         $client = new JSMS($appKey, $masterSecret, ['ssl_verify' => false]);
 
         // 发送文本验证码短信
-        $response = $client->sendVoiceCode($phone);
+        $response = $client->sendVoiceCode($mobile);
 
         //设置缓存
-        cache::set($phone, $response['body']['msg_id'], 60);
+        cache::set($mobile, $response['body']['msg_id'], 60);
 
-        return $this->output_success(10010,[],'已经向手机号为' . $phone . '的用户发送语音验证码');
+        return $this->output_success(10010,[],'已经向手机号为' . $mobile . '的用户发送语音验证码');
     }
 
     /**

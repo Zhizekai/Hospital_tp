@@ -3,10 +3,8 @@
 namespace app\api\controller;
 
 use app\api\model\MedRecordModel;
-use think\console\command\make\Model;
 use think\Db;
 use think\Request;
-use think\Session;
 use think\Cache;
 use token\Token;
 
