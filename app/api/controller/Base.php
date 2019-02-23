@@ -98,17 +98,19 @@ class Base extends Controller
          * 需不需要管理员登陆
          */
 
-        //需要token,salt,timestamp
-        if($issign){
-            $token = $this->admin_check_sign();
-        }
+//              //需要token,salt,timestamp
+//        if($issign){
+//            $token = $this->admin_check_sign();
+//        }
+//
+//        /*
+//         * 验证管理员有没有操作这个模块的权限
+//         */
+//
+//        //当前管理员的id
+//        $uid = Token::get_user_id($token);
 
-        /*
-         * 验证管理员有没有操作这个模块的权限
-         */
-
-        //当前管理员的id
-        $uid = Token::get_user_id($token);
+        $uid = $this->getuid();
 
         //模块的id
         $model = input('model',0,'intval');
