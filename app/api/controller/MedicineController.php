@@ -105,7 +105,6 @@ class MedicineController extends Base
     }
     /**
      * 软删除数据
-     * @return string
      */
     public function delete()
     {
@@ -117,7 +116,7 @@ class MedicineController extends Base
         $med = new MedRecordModel();
         $res = $med->alias('a')
             ->join('hos_medicine b','a.medicine_id = b.id')
-            ->where(['user_id'=>$uid,'is_deleted'=>0,'id'=>$id])
+            ->where(['user_id'=>$uid,'is_deleted'=>0,'a.id'=>$id])
             ->update(1,'is_deleted');
 
         if ($res){
@@ -128,30 +127,4 @@ class MedicineController extends Base
     }
 
 
-    /**
-     * 添加服药记录
-     * @return string
-     */
-    public function insert()
-    {
-        $records_name = input('records_name','');
-        $time = input('time','');
-        $user_id = self::get_user_id();
-
-        if (empty($records_name)&&empty($time)) {
-            return '请输入药品名字和服用时间';
-        }
-
-        $data = [
-            'records_name' => $records_name,
-            'time' => $time,
-            'user_id' => $user_id,
-        ];
-
-        $result = Db::table('eat_records')->insert($data);
-
-        //显示结果
-        self::outcome($result);
-
-    }
 }

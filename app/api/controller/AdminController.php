@@ -10,6 +10,7 @@ namespace app\api\controller;
 
 
 use think\Db;
+use think\cache;
 
 class AdminController extends Base
 {
@@ -20,9 +21,20 @@ class AdminController extends Base
     public function index()
     {
 
+        $uid = input('user_id',0,'intval');
+        $model = input('model',0,'intval');
+        if ($model == 0){
+            return $this->output_error(500,'请传入模块');
+        }
+        //判断管理员有没有权限
+        if (!$this->check_power($uid,$model)){
+            return $this->output_error(500,'无权限');
+        }
+
+
         $result = Db::name('user')
             ->field('id,mobile,name,power_ids')
-            ->where('status', 2)
+            ->where(['status'=>2])
             ->select()->toArray();
 
         foreach ($result as $key => $value) {
@@ -42,7 +54,7 @@ class AdminController extends Base
      * 寻找权限
      * @param string
      */
-    public function get_power($power_ids)
+    private function get_power($power_ids)
     {
         //按照逗号切割字符串
         $ids = explode(',', $power_ids);
@@ -63,6 +75,20 @@ class AdminController extends Base
      */
     public function add()
     {
+
+        //当前用户的id
+        $uid = input('user_id',0,'intval');
+
+        //模块的id
+        $model = input('model',0,'intval');
+        if ($model == 0){
+            return $this->output_error(500,'请传入模块');
+        }
+        //判断管理员有没有权限
+        if (!$this->check_power($uid,$model)){
+            return $this->output_error(500,'无权限');
+        }
+
         $mobile = input('mobile', 0, 'trim');
         $name = input('name', 0, 'trim');
         $password = input('password', 0, 'trim');
@@ -107,6 +133,23 @@ class AdminController extends Base
      */
     public function update()
     {
+
+
+        //当前用户的id
+        $uid = input('user_id',0,'intval');
+
+        //模块的id
+        $model = input('model',0,'intval');
+        if ($model == 0){
+            return $this->output_error(500,'请传入模块');
+        }
+        //判断管理员有没有权限
+        if (!$this->check_power($uid,$model)){
+            return $this->output_error(500,'无权限');
+        }
+
+
+        //要修改的管理员的id
         $id = input('id', 0, 'intval');
         $mobile = input('mobile', 0, 'trim');
         $name = input('name', 0, 'trim');
@@ -153,6 +196,20 @@ class AdminController extends Base
      */
     public function delete()
     {
+
+        //当前用户的id
+        $uid = input('user_id',0,'intval');
+
+        //模块的id
+        $model = input('model',0,'intval');
+        if ($model == 0){
+            return $this->output_error(500,'请传入模块');
+        }
+        //判断管理员有没有权限
+        if (!$this->check_power($uid,$model)){
+            return $this->output_error(500,'无权限');
+        }
+
         $id = input('id', 0, 'intval');
         if (empty($id)) {
             return $this->output_error(10001, '请输入id号');

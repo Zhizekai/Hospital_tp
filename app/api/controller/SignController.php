@@ -56,7 +56,6 @@ class SignController extends Base
         $top_pressure = input('top_pressure','','trim');
         $buttom_pressure = input('buttom_pressure','','trim');
         $heart_rate = input('heart_rate',0,'intval');
-        $create_time = time();
 
         $token = $this->check_sign();
         if(!empty($token)){
@@ -66,7 +65,12 @@ class SignController extends Base
         }
 
         $sign = new SignModel();
-        $res = $sign->validate(true)->insert(['user_id'=>$uid,'top_pressure'=>$top_pressure,'buttom_pressure'=>$buttom_pressure,'heart_rate'=>$heart_rate,'create_time'=>$create_time]);
+        $res = $sign->validate(true)->insert([
+            'user_id'=>$uid,
+            'top_pressure'=>$top_pressure,
+            'buttom_pressure'=>$buttom_pressure,
+            'heart_rate'=>$heart_rate,
+            'create_time'=>time()]);
 
         if ($res){
             return $this->output_success(10011,[],'体征添加成功!');

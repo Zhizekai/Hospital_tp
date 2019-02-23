@@ -9,10 +9,10 @@ class Token
 {
     /**
      * 创建Token
-     * 创建规则：
-     * token=sha1(user_id+secret_key+timestamp_now)
-     * @param $user_id
-     */
+* 创建规则：
+* token=sha1(user_id+secret_key+timestamp_now)
+* @param $user_id
+*/
     public static function create($user_id){
         //创建salt
         $token['salt']=Token::generate_salt();

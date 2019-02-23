@@ -26,7 +26,7 @@ class VersionController extends Base
         if (!empty($res)){
             return $this->output_success(10010,$res,'这是最新的版本号');
         }else{
-            return $this->output_error(10001,'体征列表获取失败!');
+            return $this->output_error(10001,'版本号列表获取失败!');
         }
     }
 

@@ -11,18 +11,14 @@ namespace app\api\controller;
 
 use app\api\model\UserModel;
 use think\Db;
-use think\response\Json;
-use think\Session;
 use think\Cache;
 use JiGuang\JSMS;
-use think\File;
-use think\View;
 
 vendor('jiguang.jsms.src.JSMS');
 
 //require '../../../simplewind/vendor/autoload.php';
 
-class UsersController extends Base
+class UserController extends Base
 {
     /**
      * 用户注册
@@ -35,9 +31,18 @@ class UsersController extends Base
         $password = input('password','','trim');
         $code = input('code','','trim');
 
-        if (empty($mobile)||empty($password)) {
-            $this->output_error(10001,'手机号/密码不能为空');
-        }
+        $data = [
+          'mobile' =>$mobile,
+          'password' => $password,
+          'code' => $code,
+        ];
+
+        //验证器信息都得让他填了
+        $dd = $this->validate($data,'User');
+        if (!empty($dd)) {
+            return $this->output_error(10010,$dd);
+        };
+
 
         $msg_id = cache::get($mobile);
         $check_code = $this->check_code($msg_id, $code);
@@ -110,7 +115,6 @@ class UsersController extends Base
     }
     /**
      * 注销
-     * @return string
      */
     public function login_out()
     {
@@ -118,8 +122,12 @@ class UsersController extends Base
         if (empty($token)){
             return '你还没登陆了，注什么销';
         }
-        $result = Db::table('users')->where('token',$token)->setField('token',null);
-        self::outcome($result);
+        $result = Db::name('token')->where('token',$token)->setField('token',0);
+        if ($result){
+            return $this->output_success(10011,[],'注销成功');
+        }else{
+            return $this->output_error(10003,'注销失败');
+        }
     }
 
 }

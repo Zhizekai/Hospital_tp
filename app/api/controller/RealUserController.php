@@ -19,17 +19,20 @@ class RealUserController extends Base
 
     /**
      * 后台展示全部个人信息
-     * input param
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
      */
     public function index()
     {
+        //验证管理员是否登陆和是否有权限
+        $this->check_power();
 
         //0是全部信息，1是通过的信息，2是未审核信息，3是没通过的信息
-        $param = input('param','','invtal');
+        $param = input('param',0,'trim');
 
-        if (empty($param)) {
-            return $this->output_error(10010,'请给出参数');
-        }
+
         switch ($param)
         {
             case 0:
@@ -46,7 +49,7 @@ class RealUserController extends Base
                 $res = $real->alias('a')
                     ->join('hos_user b','a.user_id = b.id')
                     ->field('name,mobile,sex,age,a.*')
-                    ->where(['a.status'=>'1'])//enum设置成字符串形式了，这是一个大坑
+                    ->where(['a.status'=>1])//enum设置成字符串形式了，这是一个大坑
                     ->select();
                 break;
 
@@ -56,7 +59,7 @@ class RealUserController extends Base
                 $res = $real->alias('a')
                     ->join('hos_user b','a.user_id = b.id')
                     ->field('name,mobile,sex,age,a.*')
-                    ->where(['a.status'=>'0'])//enum设置成字符串形式了，这是一个大坑
+                    ->where(['a.status'=>0])//enum设置成字符串形式了，这是一个大坑
                     ->select();
                 break;
             case 3:
@@ -64,14 +67,13 @@ class RealUserController extends Base
                 $res = $real->alias('a')
                     ->join('hos_user b','a.user_id = b.id')
                     ->field('name,mobile,sex,age,a.*')
-                    ->where(['a.status'=>'2'])//enum设置成字符串形式了，这是一个大坑
+                    ->where(['a.status'=>2])//enum设置成字符串形式了，这是一个大坑
                     ->select();
                 //未通过的信息
                 break;
         }
         if (!empty($res)) {
-            return $this->output_success(200,$res,'name是名字，mobile是电话号，sex性别，age年龄，
-            positive_img身份证前脸，back-img后脸，sfz身份证，');
+            return $this->output_success(200,$res,'name是名字，mobile是电话号，sex性别，age年龄，positive_img身份证前脸，back-img后脸，sfz身份证，');
         }else{
             return $this->output_error(404,'没有这个用户');
         }
@@ -79,12 +81,13 @@ class RealUserController extends Base
 
     /**
      * 上传个人信息
-     * input token
-     * input sign
-     * input timestamp
+     * @token
+     * @sign
+     * @timestamp
      */
     public function add()
     {
+
         //获取用户id
         $uid = $this->getuid();
         if (empty($uid)) {
@@ -109,13 +112,14 @@ class RealUserController extends Base
             $info_back = $file['back']->move(ROOT_PATH . 'public' . DS . 'upload');
 
             if ($info_back&&$info_pos){
-                $positive_img = 'http://hospital.weinuoabc.com/upload/real/'.$info_pos->getSaveName();
-                $back_img = 'http://hospital.weinuoabc.com/upload/real/'.$info_back->getSaveName();
+                $positive_img = 'http://hospital.weinuoabc.com/upload/'.$info_pos->getSaveName();
+                $back_img = 'http://hospital.weinuoabc.com/upload/'.$info_back->getSaveName();
             }else{
                 return $this->output_error(404,'图片上传失败');
             }
 
         }
+
 
         $data = [
             'user_id'=>$uid,
@@ -141,6 +145,8 @@ class RealUserController extends Base
     public function check()
     {
 
+
+        $this->check_power();
 
         $uid = input('user_id',0,'invtal');
         if (empty($uid)){
