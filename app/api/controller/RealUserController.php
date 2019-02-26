@@ -26,8 +26,16 @@ class RealUserController extends Base
      */
     public function index()
     {
-        //验证管理员是否登陆和是否有权限
-        $this->check_power();
+        //==========
+        //检验管理员是否登陆
+        $token = $this->check_sign();
+
+        //检验管理员是否有操作此模块的权限
+        if ($this->check_power($token))
+        {
+            return $this->output_error(404,'无权限');
+        };
+        //===========
 
         //0是全部信息，1是通过的信息，2是未审核信息，3是没通过的信息
         $param = input('param',0,'trim');
@@ -88,7 +96,7 @@ class RealUserController extends Base
     public function add()
     {
 
-        //获取用户id
+        //检验用户有没有登陆并且获取用户id
         $uid = $this->getuid();
         if (empty($uid)) {
             return $this->output_error(10002, '请先登陆');
@@ -139,15 +147,30 @@ class RealUserController extends Base
     }
 
     /**
-     * 人工验证个人信息
-     * 通过
+     * 人工验证
+     * @return array
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @throws \think\exception\PDOException
      */
     public function check()
     {
 
 
-        $this->check_power();
+        //==========
+        //检验管理员是否登陆
+        $token = $this->check_sign();
 
+        //检验管理员是否有操作此模块的权限
+        if ($this->check_power($token))
+        {
+            return $this->output_error(404,'无权限');
+        };
+        //===========
+
+        //用户的id
         $uid = input('user_id',0,'invtal');
         if (empty($uid)){
             return $this->output_error(10010,'请选择用户');

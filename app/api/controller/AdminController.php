@@ -11,25 +11,32 @@ namespace app\api\controller;
 
 use think\Db;
 use think\cache;
+use token\Token;
 
 class AdminController extends Base
 {
 
     /**
      * 管理员列表
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
      */
     public function index()
     {
 
-        $uid = input('user_id',0,'intval');
-        $model = input('model',0,'intval');
-        if ($model == 0){
-            return $this->output_error(500,'请传入模块');
-        }
-        //判断管理员有没有权限
-        if (!$this->check_power($uid,$model)){
-            return $this->output_error(500,'无权限');
-        }
+        //检验管理员是否登陆
+        $token = $this->check_sign();
+
+        $uid = Token::get_user_id($token);
+        $user_role = Db::name('user')->where('id',$uid)->value('user_role');
+
+        //检验管理员是否有操作此模块的权限
+        if (!$user_role == 1)
+        {
+            return $this->output_error(404,'无权限');
+        };
 
 
         $result = Db::name('user')
@@ -76,18 +83,17 @@ class AdminController extends Base
     public function add()
     {
 
-        //当前用户的id
-        $uid = input('user_id',0,'intval');
+        //检验管理员是否登陆
+        $token = $this->check_sign();
 
-        //模块的id
-        $model = input('model',0,'intval');
-        if ($model == 0){
-            return $this->output_error(500,'请传入模块');
-        }
-        //判断管理员有没有权限
-        if (!$this->check_power($uid,$model)){
-            return $this->output_error(500,'无权限');
-        }
+        $uid = Token::get_user_id($token);
+        $user_role = Db::name('user')->where('id',$uid)->value('user_role');
+
+        //检验管理员是否有操作此模块的权限
+        if (!$user_role == 1)
+        {
+            return $this->output_error(404,'无权限');
+        };
 
         $mobile = input('mobile', 0, 'trim');
         $name = input('name', 0, 'trim');
@@ -135,18 +141,17 @@ class AdminController extends Base
     {
 
 
-        //当前用户的id
-        $uid = input('user_id',0,'intval');
+        //检验管理员是否登陆
+        $token = $this->check_sign();
 
-        //模块的id
-        $model = input('model',0,'intval');
-        if ($model == 0){
-            return $this->output_error(500,'请传入模块');
-        }
-        //判断管理员有没有权限
-        if (!$this->check_power($uid,$model)){
-            return $this->output_error(500,'无权限');
-        }
+        $uid = Token::get_user_id($token);
+        $user_role = Db::name('user')->where('id',$uid)->value('user_role');
+
+        //检验管理员是否有操作此模块的权限
+        if (!$user_role == 1)
+        {
+            return $this->output_error(404,'无权限');
+        };
 
 
         //要修改的管理员的id
@@ -197,18 +202,17 @@ class AdminController extends Base
     public function delete()
     {
 
-        //当前用户的id
-        $uid = input('user_id',0,'intval');
+        //检验管理员是否登陆
+        $token = $this->check_sign();
 
-        //模块的id
-        $model = input('model',0,'intval');
-        if ($model == 0){
-            return $this->output_error(500,'请传入模块');
-        }
-        //判断管理员有没有权限
-        if (!$this->check_power($uid,$model)){
-            return $this->output_error(500,'无权限');
-        }
+        $uid = Token::get_user_id($token);
+        $user_role = Db::name('user')->where('id',$uid)->value('user_role');
+
+        //检验管理员是否有操作此模块的权限
+        if (!$user_role == 1)
+        {
+            return $this->output_error(404,'无权限');
+        };
 
         $id = input('id', 0, 'intval');
         if (empty($id)) {

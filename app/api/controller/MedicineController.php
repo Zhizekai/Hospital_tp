@@ -19,7 +19,7 @@ class MedicineController extends Base
         //拿到user_id
         $uid = $this->getuid();
         if (empty($uid)) {
-            return $this->output_error(10002,'请先登陆');
+            die;
         }
 
         $med = new MedRecordModel();

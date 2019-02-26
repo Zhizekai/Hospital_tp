@@ -16,7 +16,6 @@ use JiGuang\JSMS;
 
 vendor('jiguang.jsms.src.JSMS');
 
-//require '../../../simplewind/vendor/autoload.php';
 
 class UserController extends Base
 {

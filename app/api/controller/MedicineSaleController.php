@@ -17,11 +17,22 @@ class MedicineSaleController extends Base
 
     /**
      * 卖药的列表
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
      */
     public function index()
     {
 
-        $this->check_power();
+        //检验管理员是否登陆
+        $token = $this->check_sign();
+
+        //检验管理员是否有操作此模块的权限
+        if ($this->check_power($token))
+        {
+            return $this->output_error(404,'无权限');
+        };
 
 
         $start_time = input('start_time', '', 'intval');
@@ -53,11 +64,22 @@ class MedicineSaleController extends Base
 
     /**
      * 增加销售记录
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
      */
     public function add()
     {
 
-        $this->check_power();
+        //检验管理员是否登陆
+        $token = $this->check_sign();
+
+        //检验管理员是否有操作此模块的权限
+        if ($this->check_power($token))
+        {
+            return $this->output_error(404,'无权限');
+        };
 
         $medicine_id = input('medicine_id', 0, 'trim');
         $num = input('num', 0, 'trim');

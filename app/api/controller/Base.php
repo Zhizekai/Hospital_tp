@@ -200,7 +200,7 @@ class Base extends Controller
      */
     protected function check_power($token)
     {
-        //获得user_id
+        //获得user_id管理员的id
         $uid =  Token::get_user_id($token);
         //传入模块的id
         $model = input('model',0,'intval');
