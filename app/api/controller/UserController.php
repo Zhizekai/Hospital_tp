@@ -129,5 +129,9 @@ class UserController extends Base
             return $this->output_error(10003,'注销失败');
         }
     }
+    public function zzk()
+    {
+        var_dump(date('Y-m-d',time()));
+    }
 
 }
