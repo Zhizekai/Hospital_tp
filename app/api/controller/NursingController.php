@@ -16,13 +16,24 @@ class NursingController extends Base
 {
 
     /**
-     * 护理列表
-     * 需要登陆
+     * 护理记录列表
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
      */
     public function index()
     {
 
-        $this->check_power();
+        //检验管理员是否登陆
+        $token = $this->check_sign();
+
+        //检验管理员是否有操作此模块的权限
+        if ($this->check_power($token))
+        {
+            return $this->output_error(404,'无权限');
+        };
+
 
 
         $start_time = input('start_time',0,'intval');
@@ -60,16 +71,21 @@ class NursingController extends Base
      */
     public function add()
     {
+        //检验管理员是否登陆
+        $token = $this->check_sign();
 
-
-        $this->check_power();
-
+        //检验管理员是否有操作此模块的权限
+        if ($this->check_power($token))
+        {
+            return $this->output_error(404,'无权限');
+        };
 
         $item   =  input('item','','trim');
         $record_time   =  input('record_time','','trim');
         $frequency  =  input('frequency','','trim');
         $times   =  input('times','','trim');
         $man   =  input('man','','trim');
+        $uid = input('uid','','int');
 
 
         $nursing = new nursingmodel();
@@ -103,7 +119,14 @@ class NursingController extends Base
      */
     public function update()
     {
-        $this->check_power();
+        //检验管理员是否登陆
+        $token = $this->check_sign();
+
+        //检验管理员是否有操作此模块的权限
+        if ($this->check_power($token))
+        {
+            return $this->output_error(404,'无权限');
+        };
 
 
         //护理记录字段的id
@@ -116,14 +139,6 @@ class NursingController extends Base
         $frequency  =  input('frequency','','trim');
         $times   =  input('times','','trim');
         $man   =  input('man','','trim');
-
-
-        //验证登陆
-        $token = $this->check_sign();
-        if(empty($token)){
-            return $this->output_error(10002,'请先登录！');
-        }
-
 
         $nursing = new nursingmodel();
         $res = $nursing->validate(true)->where(['id'=>$id, 'is_deleted'=>0])->update([
@@ -145,11 +160,22 @@ class NursingController extends Base
 
     /**
      * 护理删除
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
      */
     public function delete()
     {
 
-        $this->check_power();
+        //检验管理员是否登陆
+        $token = $this->check_sign();
+
+        //检验管理员是否有操作此模块的权限
+        if ($this->check_power($token))
+        {
+            return $this->output_error(404,'无权限');
+        };
 
 
 

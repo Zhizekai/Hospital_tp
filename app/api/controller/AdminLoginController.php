@@ -31,7 +31,7 @@ class AdminLoginController extends Base
         $user_id = Db::name('user')->where(['mobile'=>$mobile,'status'=>2])->value('id');
 
         if (empty($user_id)){
-            return $this->output_error(11003,'该手机号尚未注册');
+            return $this->output_error(11003,'该管理员尚未注册');
         }
 
         $user_info = Db::name('user')->where(['id'=>$user_id,'password'=>password($password)])->find();
@@ -39,12 +39,8 @@ class AdminLoginController extends Base
 
         if (!empty($user_info)){
             $token_info = Token::get($user_id);
-
             session('user.id', $user_id);
-
-            $user_info['token'] = $token_info;
-
-            return $this->output_success(11101, $user_info, '登录成功');
+            return $this->output_success(11101, $token_info, '登录成功');
         }else{
             return $this->output_error(11004,'密码错误！');
         }

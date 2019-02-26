@@ -82,60 +82,7 @@ class Base extends Controller
     }
 
 
-    /**
-     * 验证管理员登陆和管理员权限
-     * @param $uid
-     * @param $model
-     * @param bool $issign 控制它是否需要登陆
-     * @return array|bool
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
-     */
-    protected function check_power($issign = true)
-    {
-        /*
-         * 需不需要管理员登陆
-         */
 
-//              //需要token,salt,timestamp
-//        if($issign){
-//            $token = $this->admin_check_sign();
-//        }
-//
-//        /*
-//         * 验证管理员有没有操作这个模块的权限
-//         */
-//
-//        //当前管理员的id
-//        $uid = Token::get_user_id($token);
-
-        $uid = $this->getuid();
-
-        //模块的id
-        $model = input('model',0,'intval');
-        if ($model == 0){
-            return $this->output_error(500,'请传入模块');
-        }
-        //判断管理员有没有权限
-        if (!$this->check_power($uid,$model)){
-            return $this->output_error(500,'无权限');
-        }
-
-
-        $result = Db::name('user')->where(['id'=>$uid])->find();
-
-        if (in_array($result['user_role'],[1,2])){
-            if ($result['user_role'] ==2){
-                if (!in_array($model,explode(',',$result['power_ids']))){
-                    return false;
-                }
-            }
-            return true;
-        }else{
-            return $this->output_error(500,'该账户不是管理员');
-        }
-    }
 
 
 //    前端可封装
@@ -242,8 +189,47 @@ class Base extends Controller
 
 
     /**
+     * 验证管理员权限
+     * @model
+     * @param token int
+     *
+     * @return array|bool
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    protected function check_power($token)
+    {
+        //获得user_id
+        $uid =  Token::get_user_id($token);
+        //传入模块的id
+        $model = input('model',0,'intval');
+        if ($model == 0){
+            return $this->output_error(500,'请传入模块');
+        }
+
+        $result = Db::name('user')->where(['id'=>$uid])->find();
+
+        //判断权限
+        if (in_array($result['user_role'],[1,2])){
+            //超级管理员
+            if ($result['user_role'] ==2){
+                //普通管理员
+                if (!in_array($model,explode(',',$result['power_ids']))){
+                    return false;
+                }
+            }
+            return true;
+        }else{
+            return $this->output_error(500,'该账户不是管理员');
+        }
+    }
+
+    /**
      * 检查sign是否正常
-     * @return mixed
+     * @input token sign timestamp
+     *
+     * @return mixed token
      */
     protected function admin_check_sign()
     {
