@@ -25,7 +25,7 @@ class UserController extends Base
      */
     public function zzk()
     {
-        var_dump(date('Y-m-d',time()));
+        var_dump(date(time()));
     }
 
 
@@ -122,8 +122,10 @@ class UserController extends Base
         $response = $client->checkCode($msg_id, $code);
         return $response['body']['is_valid'];
     }
+
     /**
      * 注销
+     * @return array|string
      */
     public function login_out()
     {
