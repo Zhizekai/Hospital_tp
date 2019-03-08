@@ -31,9 +31,10 @@ class RealUserController extends Base
         $token = $this->check_sign();
 
         //检验管理员是否有操作此模块的权限
-        if ($this->check_power($token))
+        if (!$this->check_power($token))
         {
-            return $this->output_error(404,'无权限');
+
+            return $this->output_error(404,'无展示个人信息权限');
         };
         //===========
 

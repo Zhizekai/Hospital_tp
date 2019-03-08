@@ -24,9 +24,7 @@ class AdminLoginController extends Base
         if (empty($mobile) || empty($password)) {
             return $this->output_error(11001, '用户名/密码不能为空');
         }
-        if (!isMobile($mobile)){
-            return $this->output_error(11002,'请输入正确的手机号');
-        }
+
 
         $user_id = Db::name('user')->where(['mobile'=>$mobile,'status'=>2])->value('id');
 

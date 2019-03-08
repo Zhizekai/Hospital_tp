@@ -13,6 +13,7 @@ use app\api\model\UserModel;
 use think\Db;
 use think\Cache;
 use JiGuang\JSMS;
+use token\Token;
 
 vendor('jiguang.jsms.src.JSMS');
 
@@ -25,13 +26,29 @@ class UserController extends Base
      */
     public function zzk()
     {
-        var_dump(date(time()));
+
+//        $start = date('Y-m-d H:s:i',strtotime('-2 day',strtotime('2018-5-6')));
+//
+//        var_dump($start);
+//        var_dump($start);
+//        $map = [];
+//        $map['update_time'] = ['between',[$start,date('Y-m-d H:s:i',time())]];
+        $result = Db::name('version')->whereTime('update_time','-2 day')->select();
+
+
+        if ($result){
+            return $this->output_success(10011,$result,'1');
+        }else{
+            return $this->output_error(10003,'0');
+        }
     }
 
-
     /**
-     * 用户注册
+     * 用户注册接口
      * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
      */
     public function register()
     {
@@ -39,18 +56,6 @@ class UserController extends Base
         $mobile = input('mobile', 0,'trim');
         $password = input('password','','trim');
         $code = input('code','','trim');
-
-        $data = [
-          'mobile' =>$mobile,
-          'password' => $password,
-          'code' => $code,
-        ];
-
-        //验证器信息都得让他填了
-        $dd = $this->validate($data,'User');
-        if (!empty($dd)) {
-            return $this->output_error(10010,$dd);
-        };
 
 
         $msg_id = cache::get($mobile);
@@ -82,6 +87,71 @@ class UserController extends Base
     }
 
     /**
+     * 忘记密码接口
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public function forget()
+    {
+        //获取    电话  密码  验证码
+        $mobile = input('mobile', 0,'trim');
+        $password = input('password','','trim');
+        $code = input('code','','trim');
+
+
+        $msg_id = cache::get($mobile);
+        $check_code = $this->check_code($msg_id, $code);
+        if (!$check_code) {
+            $this->output_error(10010,'验证码不对');
+        }
+
+
+        $check = Db::name('user')->where('mobile', $mobile)->find();
+
+        if (empty($check)) {
+            return $this->output_success(10011,[],'该号码未注册');
+        } else {
+            $result = Db::name('user')->where('mobile',$mobile)->update(['password'=>password($password)]);
+        }
+
+        if ($result){
+            return $this->output_success(10011,[],'修改密码成功');
+        }else{
+            return $this->output_error(10003,'修改密码失败');
+        }
+    }
+
+    public function mobile_login()
+    {
+
+        $mobile = input('mobile',0,'trim');
+        $code = input('code',0,'trim');
+
+        if (empty($mobile) || empty($password)) {
+            return $this->output_error(11001, '用户名/密码不能为空');
+        }
+
+
+        $user_id = Db::name('user')->where(['mobile'=>$mobile,'status'=>1])->value('id');
+
+        if (empty($user_id)){
+            return $this->output_error(11003,'该手机号尚未注册');
+        }
+
+        $msg_id = cache::get($mobile);
+        $check_code = $this->check_code($msg_id, $code);
+        if (!$check_code) {
+            $this->output_error(10010,'验证码不对');
+        }
+
+        $token_info = Token::get($user_id);
+        session('user.id', $user_id);
+        return $this->output_success(11101, $token_info, '登录成功');
+    }
+
+    /**
      * 发送验证码
      */
     public function send()
@@ -103,7 +173,7 @@ class UserController extends Base
         $response = $client->sendVoiceCode($mobile);
 
         //设置缓存
-        cache::set($mobile, $response['body']['msg_id'], 60);
+        cache::set($mobile, $response['body']['msg_id'], 120);
 
         return $this->output_success(10010,[],'已经向手机号为' . $mobile . '的用户发送语音验证码');
     }
@@ -120,6 +190,11 @@ class UserController extends Base
         $client = new JSMS($appKey, $masterSecret, ['ssl_verify' => false]);
 
         $response = $client->checkCode($msg_id, $code);
+
+        if (!array_key_exists('is_valid',$response['body'])) {
+            $json = json_encode($this->output_error(500,'此手机号今天获取验证码次数过多，等到明天再发吧，人家有点吃不消了呢'),JSON_UNESCAPED_UNICODE);
+            echo $json;exit;
+        }
         return $response['body']['is_valid'];
     }
 

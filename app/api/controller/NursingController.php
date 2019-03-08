@@ -96,7 +96,6 @@ class NursingController extends Base
             'frequency' => $frequency,
             'times'  => $times,
             'man'   =>  $man,
-            'create_time'>time()
         ]);
 
         if ($res){

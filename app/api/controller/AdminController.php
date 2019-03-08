@@ -23,6 +23,12 @@ class AdminController extends Base
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
+    public function zzk()
+    {
+        $power_ids = input('power_ids/a');
+        $red = implode(',',$power_ids);
+        var_dump($red);
+    }
     public function index()
     {
 
@@ -45,8 +51,23 @@ class AdminController extends Base
             ->select()->toArray();
 
         foreach ($result as $key => $value) {
-            $res = $this->get_power($value['power_ids']);
-            $result[$key]['power_ids'] = $res;
+
+
+            $ids = explode(',', $value['power_ids']);
+
+            foreach ($ids as $key1 => $value1) {
+                $power = Db::name('power')->where([
+                    'id' => $value1,
+                    'status' => 0,
+                ])->field('name')->find();
+
+                $ids[$key1] = $power;
+
+            }
+            var_dump($ids);
+
+            die;
+            $result[$key]['power_ids'] = $ids;
         }
 
 
@@ -65,6 +86,7 @@ class AdminController extends Base
     {
         //按照逗号切割字符串
         $ids = explode(',', $power_ids);
+
         foreach ($ids as $key => $value) {
             $power = Db::name('power')->where([
                 'id' => $value,
@@ -98,7 +120,7 @@ class AdminController extends Base
         $mobile = input('mobile', 0, 'trim');
         $name = input('name', 0, 'trim');
         $password = input('password', 0, 'trim');
-        $power_ids = input('power_ids', 0, 'trim');
+        $power_ids = input('power_ids/a');
 
         if (empty($mobile)) {
             return $this->output_error(1000, '请输入电话号码');
@@ -119,8 +141,8 @@ class AdminController extends Base
         $data = [
             'mobile' => $mobile,
             'name' => $name,
-            'password' => password($password),
-            'power_ids' => $power_ids,
+            'password' => $password,
+            'power_ids' => implode(',',$power_ids),
             'status' => 2,
         ];
         $res = Db::name('power')->insert($data);

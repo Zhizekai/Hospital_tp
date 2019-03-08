@@ -104,7 +104,7 @@ class Base extends Controller
     protected function check_sign()
     {
         $token = input('param.token');
-        $sign = input('param.sign');
+//        $sign = input('param.sign');
         $timestamp = input('param.timestamp');
         //1. 验证参数是否为空
         //===============
@@ -113,11 +113,11 @@ class Base extends Controller
             echo json_encode($json, JSON_UNESCAPED_UNICODE);
             exit;
         }
-        if (empty($sign)) {
-            $json = $this->output_error(10006, '签名不能为空');
-            echo json_encode($json, JSON_UNESCAPED_UNICODE);
-            exit;
-        }
+//        if (empty($sign)) {
+//            $json = $this->output_error(10006, '签名不能为空');
+//            echo json_encode($json, JSON_UNESCAPED_UNICODE);
+//            exit;
+//        }
         if (empty($timestamp)) {
             $json = $this->output_error(10007, '时间戳不能为空');
             echo json_encode($json, JSON_UNESCAPED_UNICODE);
@@ -150,41 +150,43 @@ class Base extends Controller
             echo json_encode($json, JSON_UNESCAPED_UNICODE);
             exit;
         }
+        return $token;
 
 
         //3. 验证sign是否合法
         //==============
         //3.1 获取sign_server
-        $module = strtolower(Request::instance()->module());
-        $controller = strtolower(Request::instance()->controller());
-        $action = strtolower(Request::instance()->action());
-        $request_uri = '/' . $module . '/' . $controller . '/' . $action;
-        $salt = $token_server_info['salt'];
-        $sign_server = sha1($token . $salt . $request_uri . $timestamp);
+//        $module = strtolower(Request::instance()->module());
+//        $controller = strtolower(Request::instance()->controller());
+//        $action = strtolower(Request::instance()->action());
+//        $request_uri = '/' . $module . '/' . $controller . '/' . $action;
+//        $salt = $token_server_info['salt'];
+//        $sign_server = sha1($token . $salt . $request_uri . $timestamp);
 
         //3.2 查询是否存在相同的sign
         //签名sign过期时间应该等于token过期时间，保证在token生命周期内不会有重复的sign
-        $redis = Redis::getRedis();
-        $sign_exist = $redis->get('sign_' . $sign);
-        if ($sign_exist) {
-            $json = $this->output_error(10009, '签名异常');
-            echo json_encode($json, JSON_UNESCAPED_UNICODE);
-            exit;
-        }
+//        $redis = Redis::getRedis();
 
-        //3.3 对比客户端和服务器端签名是否一致
-        if ($sign === $sign_server) {
-            //存储sign,方便3.2验证
-            $redis->setex('sign_' . $sign, Config::get('token.expire_time'), 1);
-            return $token;
-        } else {
+//        $sign_exist = $redis->get('sign_' . $sign);
+//        if ($sign_exist) {
+//            $json = $this->output_error(10009, '签名异常');
+//            echo json_encode($json, JSON_UNESCAPED_UNICODE);
+//            exit;
+//        }
 
-            var_dump($request_uri);
-            trace('debug--'.$token .'|'. $salt .'|' . $request_uri  .'|'. $timestamp .'|'.$sign, 'debug');
-            $json = $this->output_error(10004, '请求认证失败');
-            echo json_encode($json, JSON_UNESCAPED_UNICODE);
-            exit;
-        }
+//        //3.3 对比客户端和服务器端签名是否一致
+//        if ($sign === $sign_server) {
+//            //存储sign,方便3.2验证
+//            $redis->setex('sign_' . $sign, Config::get('token.expire_time'), 1);
+//            return $token;
+//        } else {
+//
+//            var_dump($request_uri);
+//            trace('debug--'.$token .'|'. $salt .'|' . $request_uri  .'|'. $timestamp .'|'.$sign, 'debug');
+//            $json = $this->output_error(10004, '请求认证失败');
+//            echo json_encode($json, JSON_UNESCAPED_UNICODE);
+//            exit;
+//        }
     }
 
 
@@ -204,24 +206,31 @@ class Base extends Controller
         $uid =  Token::get_user_id($token);
         //传入模块的id
         $model = input('model',0,'intval');
-        if ($model == 0){
-            return $this->output_error(500,'请传入模块');
+        if (empty($model)){
+            $json =  $this->output_error(500,'请传入模块');
+            echo json_encode($json,JSON_UNESCAPED_UNICODE);exit;
         }
 
         $result = Db::name('user')->where(['id'=>$uid])->find();
 
+
         //判断权限
         if (in_array($result['user_role'],[1,2])){
+
             //超级管理员
             if ($result['user_role'] ==2){
+
                 //普通管理员
                 if (!in_array($model,explode(',',$result['power_ids']))){
+
                     return false;
                 }
             }
             return true;
         }else{
-            return $this->output_error(500,'该账户不是管理员');
+
+            echo json_encode($this->output_error(500,'该账户不是管理员'),JSON_UNESCAPED_UNICODE);
+            exit;
         }
     }
 

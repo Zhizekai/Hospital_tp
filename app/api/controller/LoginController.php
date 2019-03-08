@@ -14,9 +14,11 @@ use token\Token;
 class LoginController extends Base
 {
     /**
-     *用户登陆
-     * @param $user_id
+     * 用户登陆接口
      * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
      */
     public function login(){
         $mobile = input('mobile','','trim');
@@ -45,5 +47,7 @@ class LoginController extends Base
             return $this->output_error(11004,'密码错误！');
         }
     }
+
+
 
 }

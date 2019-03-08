@@ -3,10 +3,7 @@
 namespace app\api\controller;
 
 use app\api\model\MedRecordModel;
-use think\Db;
-use think\Request;
-use think\Cache;
-use token\Token;
+
 
 class MedicineController extends Base
 {
@@ -45,7 +42,7 @@ class MedicineController extends Base
         $med = new MedRecordModel();
         $res = $med->alias('a')
                     ->join('hos_medicine b','a.medicine_id = b.id')
-                    ->where(['user_id'=>$uid,'is_deleted'=>0])
+                    ->where(['user_id'=>$uid,'a.is_deleted'=>0])
                     ->field('dose,cycle,name')
                     ->select();
 

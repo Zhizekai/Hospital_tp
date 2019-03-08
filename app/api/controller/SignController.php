@@ -24,6 +24,12 @@ class SignController extends Base
         $start_time = input('start_time',0,'intval');
         $end_time = input('end_time',0,'intval');
 
+        $uid = $this->getuid();
+
+        if(empty($uid)){
+            return $this->output_error(10002,'请先登录！');
+        }
+
         $where = [];
         if($start_time != 0 && $end_time != 0){
             $where['create_time'] = ['>=',$start_time];
@@ -34,7 +40,7 @@ class SignController extends Base
             $where['create_time'] = ['>=',$end_time];
         }
 
-        $res = Db::name('sign')->where($where)->select();
+        $res = Db::name('sign')->where($where)->where('delete_time',0)->where(['user_id'=>$uid])->select();
 
         if (!empty($res)){
             return $this->output_success(10010,$res,'体征列表获取成功！');
@@ -56,21 +62,27 @@ class SignController extends Base
         $top_pressure = input('top_pressure','','trim');
         $buttom_pressure = input('buttom_pressure','','trim');
         $heart_rate = input('heart_rate',0,'intval');
+        $create_time = time();
 
-        $token = $this->check_sign();
-        if(!empty($token)){
-            $uid = Token::get_user_id($token);
-        }else{
+
+//        原验签代码
+//        $token = $this->check_sign();
+//        if(!empty($token)){
+//            $uid = Token::get_user_id($token);
+//        }else{
+//            return $this->output_error(10002,'请先登录！');
+//        }
+
+//        现在改成：
+        $uid = $this->getuid();
+
+        if(empty($uid)){
             return $this->output_error(10002,'请先登录！');
         }
 
+
         $sign = new SignModel();
-        $res = $sign->validate(true)->insert([
-            'user_id'=>$uid,
-            'top_pressure'=>$top_pressure,
-            'buttom_pressure'=>$buttom_pressure,
-            'heart_rate'=>$heart_rate,
-            'create_time'=>time()]);
+        $res = $sign->validate(true)->insert(['user_id'=>$uid,'top_pressure'=>$top_pressure,'buttom_pressure'=>$buttom_pressure,'heart_rate'=>$heart_rate,'create_time'=>$create_time]);
 
         if ($res){
             return $this->output_success(10011,[],'体征添加成功!');
@@ -87,7 +99,7 @@ class SignController extends Base
      * return json
      */
     public function edit(){
-        $token = $this->check_sign();
+
         $id = input('id',0,'intval');
         $top_pressure = input('top_pressure','','trim');
         $buttom_pressure = input('buttom_pressure','','trim');
@@ -98,14 +110,16 @@ class SignController extends Base
         if ($id ==0 ){
             return $this->output_error(10003,'请传入ID');
         }
-        if(!empty($token)){
-            $uid = Token::get_user_id($token);
-        }else{
+        $uid = $this->getuid();
+
+        if(empty($uid)){
             return $this->output_error(10002,'请先登录！');
         }
 
         $sign = new SignModel();
-        $res = $sign->validate(true)->where(['id'=>$id])->update(['user_id'=>$uid,'top_pressure'=>$top_pressure,'buttom_pressure'=>$buttom_pressure,'heart_rate'=>$heart_rate,'create_time'=>$create_time]);
+        $res = $sign->validate(true)
+            ->where(['id'=>$id])
+            ->update(['user_id'=>$uid,'top_pressure'=>$top_pressure,'buttom_pressure'=>$buttom_pressure,'heart_rate'=>$heart_rate,'create_time'=>$create_time]);
 
         if ($res){
             return $this->output_success(10011,[],'体征更新成功!');
@@ -119,9 +133,9 @@ class SignController extends Base
      */
     public function delete(){
         $id = input('id',0,'intval');
-        $token = $this->check_sign();
+        $uid = $this->getuid();
 
-        if (empty($token)){
+        if(empty($uid)){
             return $this->output_error(10002,'请先登录！');
         }
 
