@@ -25,9 +25,9 @@ class AdminController extends Base
      */
     public function zzk()
     {
-        $power_ids = input('power_ids/a');
-        $red = implode(',',$power_ids);
-        var_dump($red);
+
+
+
     }
     public function index()
     {
@@ -45,28 +45,29 @@ class AdminController extends Base
         };
 
 
-        $result = Db::name('user')
-            ->field('id,mobile,name,power_ids')
-            ->where(['status'=>2])
-            ->select()->toArray();
+        $name = input('name','','trim');
+        $mobile = input('mobile','','trim');
+
+
+
+        $where['name'] = ['like','%'.$name.'%'];
+        $where['mobile'] = ['like','%'.$mobile.'%'];
+        $where['status'] = 2;
+
+        $result = Db::name('user')->field('id,mobile,name,power_ids,password')->where($where)->select()->toArray();
 
         foreach ($result as $key => $value) {
 
 
             $ids = explode(',', $value['power_ids']);
 
-            foreach ($ids as $key1 => $value1) {
-                $power = Db::name('power')->where([
-                    'id' => $value1,
-                    'status' => 0,
-                ])->field('name')->find();
+//            foreach ($ids as $key1 => $value1) {
+//                $power = Db::name('power')->where(['id' => $value1, 'status' => 0,])->value('name');
+//
+//                $ids[$key1] = $power;
+//
+//            }
 
-                $ids[$key1] = $power;
-
-            }
-            var_dump($ids);
-
-            die;
             $result[$key]['power_ids'] = $ids;
         }
 
@@ -78,26 +79,6 @@ class AdminController extends Base
         }
     }
 
-    /**
-     * 寻找权限
-     * @param string
-     */
-    private function get_power($power_ids)
-    {
-        //按照逗号切割字符串
-        $ids = explode(',', $power_ids);
-
-        foreach ($ids as $key => $value) {
-            $power = Db::name('power')->where([
-                'id' => $value,
-                'status' => 0,
-            ])->field('name')->find();
-
-            $ids[$key] = $power;
-
-        }
-        return $ids;
-    }
 
     /**
      * 添加管理员
@@ -122,12 +103,12 @@ class AdminController extends Base
         $password = input('password', 0, 'trim');
         $power_ids = input('power_ids/a');
 
+
+
         if (empty($mobile)) {
             return $this->output_error(1000, '请输入电话号码');
         }
-        if (isMobile($mobile)) {
-            return $this->output_error(200, '请输入正确的电话号码');
-        }
+
         if (empty($name)) {
             return $this->output_error(10010, '请输入姓名');
         }
@@ -135,7 +116,12 @@ class AdminController extends Base
             return $this->output_error(10010, '请输入密码');
         }
         if (empty($power_ids)) {
-            return $this->output_error(10001, '请分配权限');
+            return $this->output_success(10001,$power_ids,'请分配权限');
+        }
+
+        $ac = Db::name('user')->where('mobile',$mobile)->find();
+        if  ($ac) {
+            return $this->output_error(400,'账号已经存在');
         }
 
         $data = [
@@ -145,7 +131,7 @@ class AdminController extends Base
             'power_ids' => implode(',',$power_ids),
             'status' => 2,
         ];
-        $res = Db::name('power')->insert($data);
+        $res = Db::name('user')->insert($data);
 
 
         if (!empty($res)) {
@@ -181,7 +167,7 @@ class AdminController extends Base
         $mobile = input('mobile', 0, 'trim');
         $name = input('name', 0, 'trim');
         $password = input('password', 0, 'trim');
-        $power_ids = input('power_ids', 0, 'trim');
+        $power_ids = input('power_ids/a');
 
         if (empty($id)) {
             return $this->output_error(10001, '请输入id号');
@@ -189,9 +175,7 @@ class AdminController extends Base
         if (empty($mobile)) {
             return $this->output_error(1000, '请输入电话号码');
         }
-        if (isMobile($mobile)) {
-            return $this->output_error(200, '请输入正确的电话号码');
-        }
+
         if (empty($name)) {
             return $this->output_error(10010, '请输入姓名');
         }
@@ -205,10 +189,10 @@ class AdminController extends Base
         $data = [
             'mobile' => $mobile,
             'name' => $name,
-            'password' => password($password),
-            'power_ids' => $power_ids,
+            'password' => $password,
+            'power_ids' => implode(',',$power_ids),
         ];
-        $res = Db::name('power')->where('id', $id)->update($data);
+        $res = Db::name('user')->where('id', $id)->update($data);
 
 
         if (!empty($res)) {
@@ -240,7 +224,7 @@ class AdminController extends Base
         if (empty($id)) {
             return $this->output_error(10001, '请输入id号');
         }
-        $res = Db::name('user')->where('id',$id)->update('status',0);
+        $res = Db::name('user')->where('id',$id)->update(['status'=>0]);
 
         if (!empty($res)) {
             return $this->output_success(10010,[], '管理员删除成功');

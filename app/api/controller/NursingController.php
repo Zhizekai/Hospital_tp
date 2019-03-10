@@ -16,6 +16,17 @@ class NursingController extends Base
 {
 
     /**
+     * 测试方法
+     */
+    public function zzk()
+    {
+
+        $token = input('token');
+        $ii = [4234,1414,1414,2352,'sefsf'];
+        return $ii;
+    }
+
+    /**
      * 护理记录列表
      * @return array
      * @throws \think\db\exception\DataNotFoundException
@@ -29,36 +40,27 @@ class NursingController extends Base
         $token = $this->check_sign();
 
         //检验管理员是否有操作此模块的权限
-        if ($this->check_power($token))
+        if (!$this->check_power($token))
         {
             return $this->output_error(404,'无权限');
         };
 
+        $mobile = input('mobile','','trim');
+        $item = input('item','','trim');
 
+        $where = [];
+        $where['mobile'] = ['like','%'.$mobile.'%'];
+        $where['item'] = ['like','%'.$item.'%'];
+        $where['a.is_deleted'] = 0;
 
-        $start_time = input('start_time',0,'intval');
-        $end_time = input('end_time',0,'intval');
-
-
-
-        $map = [];
-        if($start_time != 0 && $end_time != 0){
-            $map['create_time'] = ['between',[$start_time,$end_time]];
-        }elseif ($start_time != 0){
-            $map['create_time'] = ['>=',$start_time];
-        }elseif ($end_time != 0){
-            $map['create_time'] = ['>=',$end_time];
-        }
-        $map['a.is_deleted'] = 0;
-
-        $res = Db::name('nursing')->alias('a')->join([['hos_user b','a.user_id = b.id']])->where('is_deleted',0)
+        $res = Db::name('nursing')->alias('a')->join([['hos_user b','a.user_id = b.id']])
+            ->where($where)
             ->field('name,mobile,a.*')
-
             ->select();
         if (!empty($res)) {
             return $this->output_success(10010, $res, '这些都是护理记录');
         } else {
-            return $this->output_error(11000, '护理记录查询失败');
+            return $this->output_success(11000, [],'护理记录查询失败');
         }
     }
 
@@ -75,7 +77,7 @@ class NursingController extends Base
         $token = $this->check_sign();
 
         //检验管理员是否有操作此模块的权限
-        if ($this->check_power($token))
+        if (!$this->check_power($token))
         {
             return $this->output_error(404,'无权限');
         };
@@ -101,7 +103,7 @@ class NursingController extends Base
         if ($res){
             return $this->output_success(10011,[],'护理记录添加成功!');
         }else{
-            return $this->output_error(10003,'护理记录添加失败!');
+            return $this->output_success(10003,[],'护理记录添加失败!');
         }
 
 
@@ -122,7 +124,7 @@ class NursingController extends Base
         $token = $this->check_sign();
 
         //检验管理员是否有操作此模块的权限
-        if ($this->check_power($token))
+        if (!$this->check_power($token))
         {
             return $this->output_error(404,'无权限');
         };
@@ -152,7 +154,7 @@ class NursingController extends Base
         if ($res){
             return $this->output_success(10011,[],'护理记录修改成功!');
         }else{
-            return $this->output_error(10003,'护理记录修改失败!');
+            return $this->output_success(10003,[],'护理记录修改失败!');
         }
     }
 
@@ -171,12 +173,10 @@ class NursingController extends Base
         $token = $this->check_sign();
 
         //检验管理员是否有操作此模块的权限
-        if ($this->check_power($token))
+        if (!$this->check_power($token))
         {
             return $this->output_error(404,'无权限');
         };
-
-
 
         //护理记录字段的id
         $id = input('id',0,'trim');
@@ -193,7 +193,7 @@ class NursingController extends Base
         if ($res){
             return $this->output_success(10011,[],'护理记录删除成功!');
         }else{
-            return $this->output_error(10003,'护理记录删除失败!');
+            return $this->output_success(10003,[],'护理记录删除失败!');
         }
     }
 

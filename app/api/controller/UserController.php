@@ -27,20 +27,8 @@ class UserController extends Base
     public function zzk()
     {
 
-//        $start = date('Y-m-d H:s:i',strtotime('-2 day',strtotime('2018-5-6')));
-//
-//        var_dump($start);
-//        var_dump($start);
-//        $map = [];
-//        $map['update_time'] = ['between',[$start,date('Y-m-d H:s:i',time())]];
-        $result = Db::name('version')->whereTime('update_time','-2 day')->select();
-
-
-        if ($result){
-            return $this->output_success(10011,$result,'1');
-        }else{
-            return $this->output_error(10003,'0');
-        }
+        $ii = input('dd/a');
+        var_dump($ii);
     }
 
     /**

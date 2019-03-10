@@ -40,6 +40,10 @@ class RealUserController extends Base
 
         //0是全部信息，1是通过的信息，2是未审核信息，3是没通过的信息
         $param = input('param',0,'trim');
+        $mobile = input('mobile',0,'trim');
+        $sfz =input('sfz',0,'trim');
+        $where['mobile'] = ['like','%'.$mobile.'%'];
+        $where['sfz'] = ['like','%'.$sfz.'%'];
 
 
         switch ($param)
@@ -50,6 +54,7 @@ class RealUserController extends Base
                 $res = $real->alias('a')
                     ->join('hos_user b','a.user_id = b.id')
                     ->field('name,mobile,sex,age,a.*')
+                    ->where($where)
                     ->select();
                 break;
             case 1:
@@ -59,6 +64,7 @@ class RealUserController extends Base
                     ->join('hos_user b','a.user_id = b.id')
                     ->field('name,mobile,sex,age,a.*')
                     ->where(['a.status'=>1])//enum设置成字符串形式了，这是一个大坑
+                    ->where($where)
                     ->select();
                 break;
 
@@ -69,6 +75,7 @@ class RealUserController extends Base
                     ->join('hos_user b','a.user_id = b.id')
                     ->field('name,mobile,sex,age,a.*')
                     ->where(['a.status'=>0])//enum设置成字符串形式了，这是一个大坑
+                    ->where($where)
                     ->select();
                 break;
             case 3:
@@ -77,6 +84,7 @@ class RealUserController extends Base
                     ->join('hos_user b','a.user_id = b.id')
                     ->field('name,mobile,sex,age,a.*')
                     ->where(['a.status'=>2])//enum设置成字符串形式了，这是一个大坑
+                    ->where($where)
                     ->select();
                 //未通过的信息
                 break;
@@ -135,7 +143,6 @@ class RealUserController extends Base
             'sfz'   =>$sfz,
             'positive_img' => $positive_img,
             'back_img'=> $back_img,
-            'create_time' => time(),
         ];
 
         $res = Db::name('real_user')->insert($data);
@@ -165,7 +172,7 @@ class RealUserController extends Base
         $token = $this->check_sign();
 
         //检验管理员是否有操作此模块的权限
-        if ($this->check_power($token))
+        if (!$this->check_power($token))
         {
             return $this->output_error(404,'无权限');
         };

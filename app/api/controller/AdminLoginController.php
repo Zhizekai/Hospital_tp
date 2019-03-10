@@ -32,7 +32,7 @@ class AdminLoginController extends Base
             return $this->output_error(11003,'该管理员尚未注册');
         }
 
-        $user_info = Db::name('user')->where(['id'=>$user_id,'password'=>password($password)])->find();
+        $user_info = Db::name('user')->where(['id'=>$user_id,'password'=>$password])->find();
 
 
         if (!empty($user_info)){

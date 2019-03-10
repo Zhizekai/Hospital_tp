@@ -213,16 +213,12 @@ class Base extends Controller
 
         $result = Db::name('user')->where(['id'=>$uid])->find();
 
-
         //判断权限
         if (in_array($result['user_role'],[1,2])){
-
-            //超级管理员
-            if ($result['user_role'] ==2){
-
+            //如果不是超级管理员
+            if ($result['user_role'] == 2){
                 //普通管理员
                 if (!in_array($model,explode(',',$result['power_ids']))){
-
                     return false;
                 }
             }

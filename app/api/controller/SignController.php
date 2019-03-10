@@ -18,7 +18,11 @@ class SignController extends Base
 
 
     /**
-     * 体征列表接口
+     * 体征列表
+     * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
      */
     public function index(){
         $start_time = input('start_time',0,'intval');
@@ -53,48 +57,34 @@ class SignController extends Base
     /**
      * 体征添加
      * @top_pressure  String 舒张压
-     * @buttom_pressure String 收缩压
+     * @bottom_pressure String 收缩压
      * @heart_rate int 心率
      * return json
      */
 
     public function add(){
         $top_pressure = input('top_pressure','','trim');
-        $buttom_pressure = input('buttom_pressure','','trim');
+        $buttom_pressure = input('bottom_pressure','','trim');
         $heart_rate = input('heart_rate',0,'intval');
-        $create_time = time();
-
-
-//        原验签代码
-//        $token = $this->check_sign();
-//        if(!empty($token)){
-//            $uid = Token::get_user_id($token);
-//        }else{
-//            return $this->output_error(10002,'请先登录！');
-//        }
-
-//        现在改成：
         $uid = $this->getuid();
 
         if(empty($uid)){
             return $this->output_error(10002,'请先登录！');
         }
 
-
-        $sign = new SignModel();
-        $res = $sign->validate(true)->insert(['user_id'=>$uid,'top_pressure'=>$top_pressure,'buttom_pressure'=>$buttom_pressure,'heart_rate'=>$heart_rate,'create_time'=>$create_time]);
+        $res = Db::name('sign')->insert(['user_id'=>$uid,'top_pressure'=>$top_pressure,'bottom_pressure'=>$buttom_pressure,'heart_rate'=>$heart_rate]);
 
         if ($res){
             return $this->output_success(10011,[],'体征添加成功!');
         }else{
-            return $this->output_error(10003,'体征添加失败!');
+            return $this->output_success(10003,[],'这里面没有数据咯。。。。。');
         }
     }
 
     /**
      * 体征修改
      * @top_pressure  String 舒张压
-     * @buttom_pressure String 收缩压
+     * @bottom_pressure String 收缩压
      * @heart_rate int 心率
      * return json
      */
@@ -102,9 +92,8 @@ class SignController extends Base
 
         $id = input('id',0,'intval');
         $top_pressure = input('top_pressure','','trim');
-        $buttom_pressure = input('buttom_pressure','','trim');
+        $buttom_pressure = input('bottom_pressure','','trim');
         $heart_rate = input('heart_rate',0,'intval');
-        $create_time = time();
 
 
         if ($id ==0 ){
@@ -116,15 +105,13 @@ class SignController extends Base
             return $this->output_error(10002,'请先登录！');
         }
 
-        $sign = new SignModel();
-        $res = $sign->validate(true)
-            ->where(['id'=>$id])
-            ->update(['user_id'=>$uid,'top_pressure'=>$top_pressure,'buttom_pressure'=>$buttom_pressure,'heart_rate'=>$heart_rate,'create_time'=>$create_time]);
+
+        $res = Db::name('sign')->where(['id'=>$id])->update(['user_id'=>$uid,'top_pressure'=>$top_pressure,'bottom_pressure'=>$buttom_pressure,'heart_rate'=>$heart_rate]);
 
         if ($res){
             return $this->output_success(10011,[],'体征更新成功!');
         }else{
-            return $this->output_error(10003,'体征更新失败!');
+            return $this->output_error(10003,'体征没有写进数据库!');
         }
     }
 
