@@ -36,14 +36,14 @@ class NursingController extends Base
     public function index()
     {
 
-        //检验管理员是否登陆
-        $token = $this->check_sign();
-
-        //检验管理员是否有操作此模块的权限
-        if (!$this->check_power($token))
-        {
-            return $this->output_error(404,'无权限');
-        };
+//        //检验管理员是否登陆
+//        $token = $this->check_sign();
+//
+//        //检验管理员是否有操作此模块的权限
+//        if (!$this->check_power($token))
+//        {
+//            return $this->output_error(404,'无权限');
+//        };
 
         $mobile = input('mobile','','trim');
         $item = input('item','','trim');
@@ -87,7 +87,18 @@ class NursingController extends Base
         $frequency  =  input('frequency','','trim');
         $times   =  input('times','','trim');
         $man   =  input('man','','trim');
-        $uid = input('uid','','int');
+
+        $mobile = input('mobile','','trim');
+        $name = input('name','','trim');
+        $where['name'] = $name;
+        $where['name'] = $mobile;
+        $where['status'] = 1;
+
+        $uid = Db::name('user')->where($where)->value('id');
+
+        if  (empty($uid)) {
+            return $this->output_success('500',[],'压根就没有这个用户，这明显是你输错了');
+        }
 
 
         $nursing = new nursingmodel();

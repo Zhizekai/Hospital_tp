@@ -61,14 +61,15 @@ class AdminController extends Base
 
             $ids = explode(',', $value['power_ids']);
 
-//            foreach ($ids as $key1 => $value1) {
-//                $power = Db::name('power')->where(['id' => $value1, 'status' => 0,])->value('name');
-//
-//                $ids[$key1] = $power;
-//
-//            }
+            foreach ($ids as $key1 => $value1) {
+                $power = Db::name('power')->where(['id' => $value1, 'status' => 0,])->value('name');
+
+                $ids_name[$key1] = $power;
+
+            }
 
             $result[$key]['power_ids'] = $ids;
+            $result[$key]['power_ids_name'] = $ids_name;
         }
 
 

@@ -26,9 +26,18 @@ class UserController extends Base
      */
     public function zzk()
     {
+        $res = Db::name('sign')->insert([
+            'user_id'=>222,
+            'top_pressure'=>520,
+            'bottom_pressure'=>222,
+            'heart_rate'=>22,
+            'create_time'=>'2017-3-18 7:23']);
 
-        $ii = input('dd/a');
-        var_dump($ii);
+        if ($res){
+            return $this->output_success(10011,[],'体征添加成功!');
+        }else{
+            return $this->output_success(10003,[],'这里面没有数据咯。。。。。');
+        }
     }
 
     /**

@@ -66,18 +66,27 @@ class SignController extends Base
         $top_pressure = input('top_pressure','','trim');
         $buttom_pressure = input('bottom_pressure','','trim');
         $heart_rate = input('heart_rate',0,'intval');
+        $create_time = input('create_time','','trim');
+
+
         $uid = $this->getuid();
 
         if(empty($uid)){
             return $this->output_error(10002,'请先登录！');
         }
 
-        $res = Db::name('sign')->insert(['user_id'=>$uid,'top_pressure'=>$top_pressure,'bottom_pressure'=>$buttom_pressure,'heart_rate'=>$heart_rate]);
+        $res = Db::name('sign')->insert([
+            'user_id'=>$uid,
+            'top_pressure'=>$top_pressure,
+            'bottom_pressure'=>$buttom_pressure,
+            'heart_rate'=>$heart_rate,
+            'create_time' => $create_time
+        ]);
 
         if ($res){
             return $this->output_success(10011,[],'体征添加成功!');
         }else{
-            return $this->output_success(10003,[],'这里面没有数据咯。。。。。');
+            return $this->output_success(10003,[],'你没把数据加进去');
         }
     }
 
@@ -94,10 +103,12 @@ class SignController extends Base
         $top_pressure = input('top_pressure','','trim');
         $buttom_pressure = input('bottom_pressure','','trim');
         $heart_rate = input('heart_rate',0,'intval');
+        $create_time = input('create_time','','trim');
+
 
 
         if ($id ==0 ){
-            return $this->output_error(10003,'请传入ID');
+            return $this->output_error(10003,'你不给我体征的id我哪知道我要改哪条体征');
         }
         $uid = $this->getuid();
 
@@ -106,12 +117,19 @@ class SignController extends Base
         }
 
 
-        $res = Db::name('sign')->where(['id'=>$id])->update(['user_id'=>$uid,'top_pressure'=>$top_pressure,'bottom_pressure'=>$buttom_pressure,'heart_rate'=>$heart_rate]);
+        $res = Db::name('sign')->where(['id'=>$id])->update([
+
+            'top_pressure'=>$top_pressure,
+            'bottom_pressure'=>$buttom_pressure,
+            'heart_rate'=>$heart_rate,
+            'create_time' => $create_time
+
+        ]);
 
         if ($res){
             return $this->output_success(10011,[],'体征更新成功!');
         }else{
-            return $this->output_error(10003,'体征没有写进数据库!');
+            return $this->output_success(10003,[],'体征没有写进数据库!');
         }
     }
 

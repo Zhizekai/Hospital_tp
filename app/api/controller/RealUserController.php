@@ -179,27 +179,29 @@ class RealUserController extends Base
         //===========
 
         //用户的id
-        $uid = input('user_id',0,'invtal');
+        $uid = input('user_id',0,'intval');
         if (empty($uid)){
             return $this->output_error(10010,'请选择用户');
         }
         $param = input('param','','intval');
-        switch ($param)
-        {
-            case 1:
-                //审核通过
-                $res = Db::name('real_user')->where('user_id',$uid)->update('status',1);
-                break;
-            case 2:
-                //审核未通过
-                $res = Db::name('real_user')->where('user_id',$uid)->update('status',2);
-                break;
+        if ($param == 1) {
+            $res = Db::name('real_user')->where('user_id',$uid)->update(['status'=>1]);
+            if (!empty($res)){
+                return $this->output_success(10001,[],'这个人实名认证通过');
+            }else{
+                return $this->output_success(10010,[],'这人实名认证已经通过了，你还想怎么样');
+            }
         }
-        if (!empty($res)){
-            return $this->output_success(10001,[],'这个人实名认证通过');
-        }else{
-            return $this->output_error(10010,'操作失败');
+
+        if ($param == 2) {
+            $res = Db::name('real_user')->where('user_id',$uid)->update(['status'=>2]);
+            if (!empty($res)){
+                return $this->output_success(10001,[],'你让这个人实名认证失败');
+            }else{
+                return $this->output_success(10010,[],'你已经让这个人实名认证失败了，还想怎么样');
+            }
         }
+
     }
 
 
