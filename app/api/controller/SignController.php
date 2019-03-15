@@ -25,8 +25,8 @@ class SignController extends Base
      * @throws \think\exception\DbException
      */
     public function index(){
-        $start_time = input('start_time',0,'intval');
-        $end_time = input('end_time',0,'intval');
+        $start_time = input('start_time','','trim');
+        $end_time = input('end_time','','trim');
 
         $uid = $this->getuid();
 
@@ -36,12 +36,11 @@ class SignController extends Base
 
         $where = [];
         if($start_time != 0 && $end_time != 0){
-            $where['create_time'] = ['>=',$start_time];
-            $where['create_time'] = ['<=',$end_time];
+            $where['create_time'] = ['between',[$start_time,$end_time]];
         }elseif ($start_time != 0){
             $where['create_time'] = ['>=',$start_time];
         }elseif ($end_time != 0){
-            $where['create_time'] = ['>=',$end_time];
+            $where['create_time'] = ['<=',$end_time];
         }
 
         $res = Db::name('sign')->where($where)->where('delete_time',0)->where(['user_id'=>$uid])->select();

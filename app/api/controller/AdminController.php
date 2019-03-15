@@ -26,6 +26,31 @@ class AdminController extends Base
     public function zzk()
     {
 
+        $result = Db::name('user')->field('id,mobile,name,power_ids,password')->select()->toArray();
+
+        foreach ($result as $key => $value) {
+
+
+            $ids = explode(',', $value['power_ids']);
+
+            $ids_name = [];
+            foreach ($ids as $key1 => $value1) {
+                $power = Db::name('power')->where(['id' => $value1, 'status' => 0,])->value('name');
+
+                $ids_name[$key1] = $power;
+
+            }
+
+            $result[$key]['power_ids'] = $ids;
+            $result[$key]['power_ids_name'] = $ids_name;
+        }
+
+
+        if ($result) {
+            return $this->output_success(10011, $result, '这都是管理员');
+        } else {
+            return $this->output_error(10003, '请求失败');
+        }
 
 
     }
@@ -61,6 +86,7 @@ class AdminController extends Base
 
             $ids = explode(',', $value['power_ids']);
 
+            $ids_name = [];
             foreach ($ids as $key1 => $value1) {
                 $power = Db::name('power')->where(['id' => $value1, 'status' => 0,])->value('name');
 

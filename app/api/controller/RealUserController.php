@@ -40,8 +40,9 @@ class RealUserController extends Base
 
         //0是全部信息，1是通过的信息，2是未审核信息，3是没通过的信息
         $param = input('param',0,'trim');
-        $mobile = input('mobile',0,'trim');
-        $sfz =input('sfz',0,'trim');
+        $mobile = input('mobile','','trim');
+        $sfz =input('sfz','','trim');
+        $where = [];
         $where['mobile'] = ['like','%'.$mobile.'%'];
         $where['sfz'] = ['like','%'.$sfz.'%'];
 
@@ -55,6 +56,7 @@ class RealUserController extends Base
                     ->join('hos_user b','a.user_id = b.id')
                     ->field('name,mobile,sex,age,a.*')
                     ->where($where)
+                    ->order('status asc')
                     ->select();
                 break;
             case 1:
@@ -187,18 +189,18 @@ class RealUserController extends Base
         if ($param == 1) {
             $res = Db::name('real_user')->where('user_id',$uid)->update(['status'=>1]);
             if (!empty($res)){
-                return $this->output_success(10001,[],'这个人实名认证通过');
+                return $this->output_success(10001,[],'这个用户实名认证通过');
             }else{
-                return $this->output_success(10010,[],'这人实名认证已经通过了，你还想怎么样');
+                return $this->output_success(10010,[],'这个用户实名认证已通过');
             }
         }
 
         if ($param == 2) {
             $res = Db::name('real_user')->where('user_id',$uid)->update(['status'=>2]);
             if (!empty($res)){
-                return $this->output_success(10001,[],'你让这个人实名认证失败');
+                return $this->output_success(10001,[],'这个用户实名认证失败');
             }else{
-                return $this->output_success(10010,[],'你已经让这个人实名认证失败了，还想怎么样');
+                return $this->output_success(10010,[],'这个用户实名认证已经失败');
             }
         }
 

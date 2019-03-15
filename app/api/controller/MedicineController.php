@@ -22,12 +22,13 @@ class MedicineController extends Base
         $med = new MedRecordModel();
         $res = $med->alias('a')
             ->join('hos_medicine b','a.medicine_id = b.id')
+
             ->select();
 
         if (!empty($res)){
             return $this->output_success(10010,$res,'name药品名称，dose药品用量，cycle服药周期');
         }else{
-            return $this->output_error(10001,'没有记录');
+            return $this->output_success(10001,[],'没有记录');
         }
 
     }
@@ -49,7 +50,7 @@ class MedicineController extends Base
         if (!empty($res)){
             return $this->output_success(10010,$res,'name药品名称，dose药品用量，cycle服药周期');
         }else{
-            return $this->output_error(10001,'没有你该吃的药');
+            return $this->output_success(10001,[],'没有你该吃的药');
         }
     }
 
@@ -64,17 +65,28 @@ class MedicineController extends Base
             return $this->output_error(10002,'请先登陆');
         }
 
+        $start_time = input('start_time','','trim');
+        $end_time = input('end_time','','trim');
+        $where = [];
+        if($start_time != 0 && $end_time != 0){
+            $where['create_time'] = ['between',[$start_time,$end_time]];
+        }elseif ($start_time != 0){
+            $where['create_time'] = ['>=',$start_time];
+        }elseif ($end_time != 0){
+            $where['create_time'] = ['<=',$end_time];
+        }
         $med = new MedRecordModel();
         $res = $med->alias('a')
             ->join('hos_medicine b','a.medicine_id = b.id')
             ->where(['user_id'=>$uid,'is_deleted'=>0])
+            ->where($where)
             ->select();
 
         if (!empty($res)){
             return $this->output_success(10010,$res,'name药品名称，dose药品用量，cycle服药周期,id是在删除提醒的时候给我的
             我要用它删除指定的提醒');
         }else{
-            return $this->output_error(10001,'没有你该吃的药');
+            return $this->output_success(10001,[],'没有你该吃的药');
         }
     }
 
@@ -97,7 +109,7 @@ class MedicineController extends Base
         if (!empty($res)){
             return $this->output_success(10010,$res,'name药品名称，dose药品用量，cycle服药周期');
         }else{
-            return $this->output_error(10001,'没有你该吃的药');
+            return $this->output_success(10001,[],'没有你该吃的药');
         }
     }
     /**
@@ -119,7 +131,7 @@ class MedicineController extends Base
         if ($res){
             return $this->output_success(10011,[],'用药删除成功');
         }else{
-            return $this->output_error(10003,'用药提醒删除失败');
+            return $this->output_success(10003,[],'用药提醒删除失败');
         }
     }
 
