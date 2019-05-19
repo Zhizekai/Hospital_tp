@@ -14,9 +14,11 @@ use token\Token;
 class LoginController extends Base
 {
     /**
-     *
-     * @param $user_id
+     * 用户登陆接口
      * @return array
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
      */
     public function login(){
         $mobile = input('mobile','','trim');
@@ -29,13 +31,13 @@ class LoginController extends Base
             return $this->output_error(11002,'请输入正确的手机号');
         }
 
-        $user_id = Db::name('users')->where(['mobile'=>$mobile,'status'=>1])->value('id');
+        $user_id = Db::name('user')->where(['mobile'=>$mobile,'status'=>1])->value('id');
 
         if (empty($user_id)){
             return $this->output_error(11003,'该手机号尚未注册');
         }
 
-        $user_info = Db::name('users')->where(['id'=>$user_id,'password'=>password($password)])->find();
+        $user_info = Db::name('user')->where(['id'=>$user_id,'password'=>password($password)])->find();
 
         if (!empty($user_info)){
             $token_info = Token::get($user_id);
@@ -45,5 +47,7 @@ class LoginController extends Base
             return $this->output_error(11004,'密码错误！');
         }
     }
+
+
 
 }
