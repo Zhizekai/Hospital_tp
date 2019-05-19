@@ -3,6 +3,7 @@
 namespace app\api\controller;
 
 use app\api\model\MedRecordModel;
+use think\Db;
 
 
 class MedicineController extends Base
@@ -21,7 +22,7 @@ class MedicineController extends Base
 
         $med = new MedRecordModel();
         $res = $med->alias('a')
-            ->join('hos_medicine b','a.medicine_id = b.id')
+            ->join('hos_medicine b','b.id = a.medicine_id')
 
             ->select();
 
@@ -69,16 +70,19 @@ class MedicineController extends Base
         $end_time = input('end_time','','trim');
         $where = [];
         if($start_time != 0 && $end_time != 0){
-            $where['create_time'] = ['between',[$start_time,$end_time]];
+            $where['a.create_time'] = ['between',[$start_time,$end_time]];
         }elseif ($start_time != 0){
-            $where['create_time'] = ['>=',$start_time];
+            $where['a.create_time'] = ['>=',$start_time];
         }elseif ($end_time != 0){
-            $where['create_time'] = ['<=',$end_time];
+            $where['a.create_time'] = ['<=',$end_time];
         }
+
+//        var_dump($uid);exit();
         $med = new MedRecordModel();
         $res = $med->alias('a')
+            ->field('a.*,b.*,a.id as med_record_id,a.create_time as med_create_time')
             ->join('hos_medicine b','a.medicine_id = b.id')
-            ->where(['user_id'=>$uid,'is_deleted'=>0])
+            ->where(['user_id'=>$uid,'a.is_deleted'=>0])
             ->where($where)
             ->select();
 
@@ -122,16 +126,15 @@ class MedicineController extends Base
 
         $id = input('med_id',0,'intval');
         //软删除用药提醒
-        $med = new MedRecordModel();
-        $res = $med->alias('a')
-            ->join('hos_medicine b','a.medicine_id = b.id')
-            ->where(['user_id'=>$uid,'is_deleted'=>0,'a.id'=>$id])
-            ->update(1,'is_deleted');
+        $res = Db::name('med_record')
+            ->where(['user_id'=>$uid,'id'=>$id])
+            ->update(['is_deleted'=>1]);
+//            ->update(['a.is_deleted'=>1]);
 
         if ($res){
-            return $this->output_success(10011,[],'用药删除成功');
+            return $this->output_success(10011,$res,'用药删除成功');
         }else{
-            return $this->output_success(10003,[],'用药提醒删除失败');
+            return $this->output_success(10003,$res,'用药提醒已经删除');
         }
     }
 

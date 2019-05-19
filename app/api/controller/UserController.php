@@ -26,17 +26,16 @@ class UserController extends Base
      */
     public function zzk()
     {
-        $res = Db::name('sign')->insert([
-            'user_id'=>222,
-            'top_pressure'=>520,
-            'bottom_pressure'=>222,
-            'heart_rate'=>22,
-            'create_time'=>'2017-3-18 7:23']);
+        $res = Db::name('med_record')->alias('a')
+            ->join('medicine b','a.medicine_id = b.id')
+            ->field('a.*,b.name,b.attention,b.price')
+            ->where('a.is_deleted',0)
+            ->update(['a.is_deleted'=>1]);
 
         if ($res){
-            return $this->output_success(10011,[],'体征添加成功!');
+            return $this->output_success(10011,$res,'用药删除成功');
         }else{
-            return $this->output_success(10003,[],'这里面没有数据咯。。。。。');
+            return $this->output_success(10003,$res,'用药提醒删除失败');
         }
     }
 
@@ -120,14 +119,17 @@ class UserController extends Base
         }
     }
 
+    /**
+     * @return array
+     */
     public function mobile_login()
     {
 
         $mobile = input('mobile',0,'trim');
         $code = input('code',0,'trim');
 
-        if (empty($mobile) || empty($password)) {
-            return $this->output_error(11001, '用户名/密码不能为空');
+        if (empty($mobile)) {
+            return $this->output_error(11001, '手机号不能为空');
         }
 
 
@@ -139,9 +141,9 @@ class UserController extends Base
 
         $msg_id = cache::get($mobile);
         $check_code = $this->check_code($msg_id, $code);
-        if (!$check_code) {
-            $this->output_error(10010,'验证码不对');
-        }
+//        if (!$check_code) {
+//            $this->output_error(10010,'验证码不对');
+//        }
 
         $token_info = Token::get($user_id);
         session('user.id', $user_id);

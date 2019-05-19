@@ -43,7 +43,7 @@ class SignController extends Base
             $where['create_time'] = ['<=',$end_time];
         }
 
-        $res = Db::name('sign')->where($where)->where('delete_time',0)->where(['user_id'=>$uid])->select();
+        $res = Db::name('sign')->order('create_time')->where($where)->where('delete_time',0)->where(['user_id'=>$uid])->select();
 
         if (!empty($res)){
             return $this->output_success(10010,$res,'体征列表获取成功！');

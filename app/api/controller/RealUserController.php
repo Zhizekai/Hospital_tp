@@ -191,7 +191,7 @@ class RealUserController extends Base
             if (!empty($res)){
                 return $this->output_success(10001,[],'这个用户实名认证通过');
             }else{
-                return $this->output_success(10010,[],'这个用户实名认证已通过');
+                return $this->output_success(10010,[],'');
             }
         }
 
@@ -200,7 +200,7 @@ class RealUserController extends Base
             if (!empty($res)){
                 return $this->output_success(10001,[],'这个用户实名认证失败');
             }else{
-                return $this->output_success(10010,[],'这个用户实名认证已经失败');
+                return $this->output_success(10010,[],'请勿重复操作');
             }
         }
 

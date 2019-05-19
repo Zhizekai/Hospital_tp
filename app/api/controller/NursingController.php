@@ -36,26 +36,26 @@ class NursingController extends Base
     public function index()
     {
 
-//        //检验管理员是否登陆
-//        $token = $this->check_sign();
-//
-//        //检验管理员是否有操作此模块的权限
-//        if (!$this->check_power($token))
-//        {
-//            return $this->output_error(404,'无权限');
-//        };
+        //检验管理员是否登陆
+        $token = $this->check_sign();
+
+        //检验管理员是否有操作此模块的权限
+        if (!$this->check_power($token))
+        {
+            return $this->output_error(404,'无权限');
+        };
 
         $mobile = input('mobile','','trim');
         $item = input('item','','trim');
 
         $where = [];
-        $where['mobile'] = ['like','%'.$mobile.'%'];
-        $where['item'] = ['like','%'.$item.'%'];
+        $where['b.mobile'] = ['like','%'.$mobile.'%'];
+        $where['a.item'] = ['like','%'.$item.'%'];
         $where['a.is_deleted'] = 0;
 
-        $res = Db::name('nursing')->alias('a')->join([['hos_user b','a.user_id = b.id']])
+        $res = Db::name('nursing')->alias('a')->join('hos_user b','a.user_id = b.id')
             ->where($where)
-            ->field('name,mobile,a.*')
+            ->field('b.name,b.mobile,a.*')
             ->select();
         if (!empty($res)) {
             return $this->output_success(10010, $res, '这些都是护理记录');
@@ -91,7 +91,7 @@ class NursingController extends Base
         $mobile = input('mobile','','trim');
         $name = input('name','','trim');
         $where['name'] = $name;
-        $where['name'] = $mobile;
+        $where['mobile'] = $mobile;
         $where['status'] = 1;
 
         $uid = Db::name('user')->where($where)->value('id');

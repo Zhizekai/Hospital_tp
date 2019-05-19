@@ -24,11 +24,19 @@ class Base extends Controller
         header('Access-Control-Allow-Origin:*');
         header("Access-Control-Allow-Methods", "POST, PUT, OPTIONS");
         header('Content-Type:application/json; charset=utf-8');
+//        if ($_SERVER['HTTPS'] != "on") {
+//            $index = strstr($_SERVER['REQUEST_URI'],"index.php");
+//            if($index){
+//                $str = preg_replace('/\/index.php/', '', $_SERVER['REQUEST_URI']);
+//                $url = "https://" . $_SERVER["SERVER_NAME"] . $str;
+//                header("location:".$url);
+//            }
+//        }
     }
 
     /**
      * 空方法处理
-     * @return json
+     * @return array
      */
     public function _empty()
     {
@@ -65,6 +73,23 @@ class Base extends Controller
         $json = [
             'status' => 0,
             'code' => $code,
+            'msg' => $msg,
+        ];
+        return $json;
+    }
+
+    /**
+     * 当当的错误消息输出
+     * @param $code
+     * @param string $msg
+     * @return array
+     */
+    protected function dang_output_error($code,  $data = array(), $msg = '')
+    {
+        $json = [
+            'status' => 0,
+            'code' => $code,
+            'data' => $data,
             'msg' => $msg,
         ];
         return $json;
